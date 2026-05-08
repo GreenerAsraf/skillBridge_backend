@@ -1,5 +1,9 @@
 import express, { Application } from 'express'
-import cors from 'cors'
+
+import cors from 'cors';
+
+
+// import cors from 'cors'
 import { auth } from './lib/auth'
 import { AuthRoutes } from './modules/Auth/auth.route'
 import { AdminRoutes } from './modules/User/user.route'
@@ -14,6 +18,7 @@ import notFound from './middlewares/notFound'
 const app: Application = express()
 
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
+
 app.use(express.json()) // Middleware to parse JSON bodies
 // app.all('api/auth/splat*')
 
