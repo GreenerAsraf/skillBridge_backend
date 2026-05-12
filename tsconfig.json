@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "target": "ES2023",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2022",
     "strict": true,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./"
+  },
+  "include": ["src/**/*", "generated/**/*"]
 }
