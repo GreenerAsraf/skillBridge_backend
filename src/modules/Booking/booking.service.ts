@@ -32,7 +32,8 @@ const getMyBookings = async (userId: string, role: string) => {
     include: { 
       tutor: { 
         include: { user: { select: { name: true, email: true } } } 
-      } 
+      },
+      review: true
     },
     orderBy: { createdAt: 'desc' }
   });
