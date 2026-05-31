@@ -33,7 +33,7 @@ app.use('/api/bookings', BookingRoutes) // Bookings management
 app.use('/api/reviews', ReviewRoutes) // Reviews management
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello World from skillbridge backend!')
 })
 
 // Global Error Handler
