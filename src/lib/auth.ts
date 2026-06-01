@@ -11,6 +11,20 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true
   },
+  user: {
+    additionalFields: {
+      role: {
+        type: 'string',
+        required: false,
+        defaultValue: 'STUDENT'
+      },
+      status: {
+        type: 'string',
+        required: false,
+        defaultValue: 'ACTIVE'
+      }
+    }
+  },
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL
 })
