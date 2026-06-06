@@ -17,7 +17,23 @@ import notFound from './middlewares/notFound'
 
 const app: Application = express()
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://skill-bridge-client-pi.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[]
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. curl, Postman, same-origin)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`))
+    }
+  },
+  credentials: true
+}))
 
 app.use(express.json()) // Middleware to parse JSON bodies
 
