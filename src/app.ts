@@ -18,10 +18,10 @@ import notFound from './middlewares/notFound'
 const app: Application = express()
 
 const allowedOrigins = [
-  'http://localhost:3000',
   'https://skill-bridge-client-pi.vercel.app',
+  'http://localhost:3000',
   process.env.FRONTEND_URL,
-].filter(Boolean) as string[]
+].filter(Boolean).map((url) => url!.replace(/\/$/, '')) as string[]
 
 app.use(cors({
   origin: (origin, callback) => {

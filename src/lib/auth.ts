@@ -3,6 +3,27 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { prisma } from './prisma'
 
 
+const getBaseURL = () => {
+  let url = process.env.BETTER_AUTH_URL;
+  if (!url) {
+    return 'http://localhost:5000/api/auth';
+  }
+  if (url.includes('||')) {
+    url = url.split('||')[0].trim();
+  }
+  url = url.replace(/\/$/, '');
+  
+  if (url.endsWith('/api')) {
+    url = `${url}/auth`;
+  } else if (!url.endsWith('/api/auth')) {
+    url = `${url}/api/auth`;
+  }
+  return url;
+};
+
+const baseURL = getBaseURL();
+const isSecure = baseURL.startsWith('https://');
+
 // const prisma = new PrismaClient();
 export const auth = betterAuth({
   database: prismaAdapter(prisma,{
@@ -26,5 +47,12 @@ export const auth = betterAuth({
     }
   },
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL
+  baseURL,
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: isSecure ? 'none' : 'lax',
+      secure: isSecure,
+      httpOnly: true,
+    }
+  }
 })

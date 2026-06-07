@@ -18,7 +18,9 @@ export const authMiddleware = (...requiredRoles: string[]) => {
       }
 
       // Check roles
-      if (requiredRoles.length > 0 && !requiredRoles.includes(session.user.role as string)) {
+      const userRole = (session.user.role as string)?.toUpperCase();
+      const hasRole = requiredRoles.some((role) => role.toUpperCase() === userRole);
+      if (requiredRoles.length > 0 && !hasRole) {
         res.status(403).json({
           success: false,
           statusCode: 403,
@@ -28,7 +30,10 @@ export const authMiddleware = (...requiredRoles: string[]) => {
       }
 
       // Attach user to req
-      (req as any).user = session.user;
+      (req as any).user = {
+        ...session.user,
+        role: userRole
+      };
       next();
     } catch (error) {
       res.status(401).json({
