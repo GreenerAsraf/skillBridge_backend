@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { auth } from '../lib/auth';
+import jwt from 'jsonwebtoken';
+import { secret } from '../modules/Auth/auth.service';
 
 export const authMiddleware = (...requiredRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const session = await auth.api.getSession({
-        headers: req.headers as any
-      });
+      const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
 
-      if (!session) {
+      if (!token) {
         res.status(401).json({
           success: false,
           statusCode: 401,
@@ -17,8 +16,11 @@ export const authMiddleware = (...requiredRoles: string[]) => {
         return;
       }
 
+      // Verify token
+      const decoded = jwt.verify(token, secret) as any;
+
       // Check roles
-      const userRole = (session.user.role as string)?.toUpperCase();
+      const userRole = decoded.role?.toUpperCase();
       const hasRole = requiredRoles.some((role) => role.toUpperCase() === userRole);
       if (requiredRoles.length > 0 && !hasRole) {
         res.status(403).json({
@@ -30,16 +32,13 @@ export const authMiddleware = (...requiredRoles: string[]) => {
       }
 
       // Attach user to req
-      (req as any).user = {
-        ...session.user,
-        role: userRole
-      };
+      (req as any).user = decoded;
       next();
     } catch (error) {
       res.status(401).json({
         success: false,
         statusCode: 401,
-        message: 'Invalid or expired session!',
+        message: 'Invalid or expired token!',
       });
     }
   };

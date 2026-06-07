@@ -3,9 +3,7 @@ import express, { Application } from 'express'
 import cors from 'cors';
 
 
-import { toNodeHandler } from 'better-auth/node'
-import { auth } from './lib/auth'
-// import { AuthRoutes } from './modules/Auth/auth.route'
+import { AuthRoutes } from './modules/Auth/auth.route'
 import { AdminRoutes } from './modules/User/user.route'
 import { PublicTutorRoutes, TutorManagementRoutes } from './modules/tutor/tutor.route'
 import { CategoryRoutes } from './modules/Category/category.route'
@@ -37,7 +35,7 @@ app.use(cors({
 
 app.use(express.json()) // Middleware to parse JSON bodies
 
-app.use('/api/auth', toNodeHandler(auth)) // Use better-auth handler
+app.use('/api/auth', AuthRoutes) // Use the custom JWT router for authentication routes
 app.use('/api/admin', AdminRoutes) // Admin routes for managing users
 app.use('/api/admin/bookings', AdminBookingRoutes) // Admin routes for managing bookings
 app.use('/api/admin/reviews', AdminReviewRoutes) // Admin routes for managing reviews
