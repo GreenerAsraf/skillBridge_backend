@@ -5,9 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const node_1 = require("better-auth/node");
-const auth_1 = require("./lib/auth");
-// import { AuthRoutes } from './modules/Auth/auth.route'
+const auth_route_1 = require("./modules/Auth/auth.route");
 const user_route_1 = require("./modules/User/user.route");
 const tutor_route_1 = require("./modules/tutor/tutor.route");
 const category_route_1 = require("./modules/Category/category.route");
@@ -34,7 +32,7 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use(express_1.default.json()); // Middleware to parse JSON bodies
-app.use('/api/auth', (0, node_1.toNodeHandler)(auth_1.auth)); // Use better-auth handler
+app.use('/api/auth', auth_route_1.AuthRoutes); // Use the custom JWT router for authentication routes
 app.use('/api/admin', user_route_1.AdminRoutes); // Admin routes for managing users
 app.use('/api/admin/bookings', booking_route_1.AdminBookingRoutes); // Admin routes for managing bookings
 app.use('/api/admin/reviews', review_route_1.AdminReviewRoutes); // Admin routes for managing reviews

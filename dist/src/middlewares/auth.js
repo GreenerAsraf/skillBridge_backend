@@ -1,14 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authMiddleware = void 0;
-const auth_1 = require("../lib/auth");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const auth_service_1 = require("../modules/Auth/auth.service");
 const authMiddleware = (...requiredRoles) => {
     return async (req, res, next) => {
         try {
-            const session = await auth_1.auth.api.getSession({
-                headers: req.headers
-            });
-            if (!session) {
+            const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+            if (!token) {
                 res.status(401).json({
                     success: false,
                     statusCode: 401,
@@ -16,8 +18,10 @@ const authMiddleware = (...requiredRoles) => {
                 });
                 return;
             }
+            // Verify token
+            const decoded = jsonwebtoken_1.default.verify(token, auth_service_1.secret);
             // Check roles
-            const userRole = session.user.role?.toUpperCase();
+            const userRole = decoded.role?.toUpperCase();
             const hasRole = requiredRoles.some((role) => role.toUpperCase() === userRole);
             if (requiredRoles.length > 0 && !hasRole) {
                 res.status(403).json({
@@ -28,17 +32,14 @@ const authMiddleware = (...requiredRoles) => {
                 return;
             }
             // Attach user to req
-            req.user = {
-                ...session.user,
-                role: userRole
-            };
+            req.user = decoded;
             next();
         }
         catch (error) {
             res.status(401).json({
                 success: false,
                 statusCode: 401,
-                message: 'Invalid or expired session!',
+                message: 'Invalid or expired token!',
             });
         }
     };
