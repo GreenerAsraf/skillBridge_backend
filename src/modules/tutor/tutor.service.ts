@@ -2,19 +2,33 @@ import { prisma } from '../../lib/prisma';
 
 // Create or update tutor profile
 const updateTutorProfile = async (userId: string, payload: any) => {
+  const { categoryId, ...restPayload } = payload;
+  
+  const data: any = { ...restPayload };
+
   const existingProfile = await prisma.tutorProfiles.findUnique({
     where: { authorId: userId }
   });
 
   if (existingProfile) {
+    if (categoryId) {
+      data.categories = {
+        set: [{ id: categoryId }]
+      };
+    }
     return await prisma.tutorProfiles.update({
       where: { authorId: userId },
-      data: payload,
+      data,
     });
   } else {
+    if (categoryId) {
+      data.categories = {
+        connect: [{ id: categoryId }]
+      };
+    }
     return await prisma.tutorProfiles.create({
       data: {
-        ...payload,
+        ...data,
         authorId: userId,
       }
     });

@@ -36,14 +36,14 @@ app.use(cors({
 
 app.use(express.json()) // Middleware to parse JSON bodies
 
-app.all('/api/auth/*', (req, res, next) => {
+app.all('/api/auth(.*)', (req, res, next) => {
   const betterAuthRoutes = [
     '/sign-in', '/sign-up', '/session', '/callback', 
     '/sign-out', '/error', '/verify-email', 
     '/forget-password', '/reset-password'
   ];
   // req.path contains the path without the mount prefix in app.use, but for app.all it contains the full path
-  // Wait, req.path in app.all('/api/auth/*') will be the full path e.g. /api/auth/sign-in
+  // Wait, req.path in app.all('/api/auth(.*)') will be the full path e.g. /api/auth/sign-in
   const path = req.path.replace('/api/auth', '');
   if (betterAuthRoutes.some(route => path.startsWith(route))) {
     return toNodeHandler(auth)(req, res);

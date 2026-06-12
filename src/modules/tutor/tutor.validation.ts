@@ -5,6 +5,7 @@ const updateProfileValidationSchema = z.object({
     bio: z.string().optional(),
     subject: z.array(z.string()).optional(),
     hourlyPrice: z.number().min(0, 'Price must be a positive number').optional(),
+    categoryId: z.string().optional(),
   })
 });
 
