@@ -1,23 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { secret } from '../modules/Auth/auth.service';
+import { auth } from '../lib/auth';
 
 export const authMiddleware = (...requiredRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+      let decoded: any = null;
 
-      if (!token) {
-        res.status(401).json({
-          success: false,
-          statusCode: 401,
-          message: 'You have no access to this route',
-        });
-        return;
+      // 1. Try better-auth session first
+      const session = await auth.api.getSession({
+        headers: req.headers as any
+      });
+
+      if (session && session.user) {
+        decoded = session.user;
+      } else {
+        // 2. Fallback to custom JWT
+        const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+
+        if (!token) {
+          res.status(401).json({
+            success: false,
+            statusCode: 401,
+            message: 'You have no access to this route',
+          });
+          return;
+        }
+
+        // Verify token
+        decoded = jwt.verify(token, secret);
       }
-
-      // Verify token
-      const decoded = jwt.verify(token, secret) as any;
 
       // Check roles
       const userRole = decoded.role?.toUpperCase();

@@ -9,9 +9,10 @@ import { PublicTutorRoutes, TutorManagementRoutes } from './modules/tutor/tutor.
 import { CategoryRoutes } from './modules/Category/category.route'
 import { BookingRoutes, AdminBookingRoutes } from './modules/Booking/booking.route'
 import { ReviewRoutes, AdminReviewRoutes } from './modules/Review/review.route'
+import { auth } from './lib/auth'
+import { toNodeHandler } from 'better-auth/node'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import notFound from './middlewares/notFound'
-
 
 const app: Application = express()
 
@@ -34,6 +35,21 @@ app.use(cors({
 }))
 
 app.use(express.json()) // Middleware to parse JSON bodies
+
+app.all('/api/auth/*', (req, res, next) => {
+  const betterAuthRoutes = [
+    '/sign-in', '/sign-up', '/session', '/callback', 
+    '/sign-out', '/error', '/verify-email', 
+    '/forget-password', '/reset-password'
+  ];
+  // req.path contains the path without the mount prefix in app.use, but for app.all it contains the full path
+  // Wait, req.path in app.all('/api/auth/*') will be the full path e.g. /api/auth/sign-in
+  const path = req.path.replace('/api/auth', '');
+  if (betterAuthRoutes.some(route => path.startsWith(route))) {
+    return toNodeHandler(auth)(req, res);
+  }
+  next();
+});
 
 app.use('/api/auth', AuthRoutes) // Use the custom JWT router for authentication routes
 app.use('/api/admin', AdminRoutes) // Admin routes for managing users
