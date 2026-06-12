@@ -36,7 +36,7 @@ app.use(cors({
 
 app.use(express.json()) // Middleware to parse JSON bodies
 
-app.all('/api/auth(.*)', (req, res, next) => {
+app.use('/api/auth', (req, res, next) => {
   const betterAuthRoutes = [
     '/sign-in', '/sign-up', '/session', '/callback', 
     '/sign-out', '/error', '/verify-email', 
