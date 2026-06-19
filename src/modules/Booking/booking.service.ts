@@ -1,14 +1,22 @@
 import { prisma } from '../../lib/prisma';
+import { initiatePayment } from '../Payment/payment.service';
 
 const createBooking = async (studentId: string, payload: any) => {
   // Payload should have tutorId, date, startTime, endTime
-  return await prisma.bookings.create({
+  // Booking starts as PENDING — payment must be completed to become CONFIRMED
+  const booking = await prisma.bookings.create({
     data: {
       ...payload,
-      date: new Date(payload.date), // Convert string to Date
-      studentId
-    }
+      date: new Date(payload.date),
+      studentId,
+      status: 'PENDING',
+    },
   });
+
+  // Auto-initiate SSLCommerz payment and return the gateway URL
+  const { paymentUrl, transactionId } = await initiatePayment(booking.id);
+
+  return { booking, paymentUrl, transactionId };
 };
 
 const getMyBookings = async (userId: string, role: string) => {
@@ -33,7 +41,8 @@ const getMyBookings = async (userId: string, role: string) => {
       tutor: { 
         include: { user: { select: { name: true, email: true } } } 
       },
-      review: true
+      review: true,
+      payment: true,
     },
     orderBy: { createdAt: 'desc' }
   });
@@ -45,12 +54,13 @@ const getBookingDetails = async (id: string) => {
     include: {
       student: { select: { name: true, email: true } },
       tutor: { include: { user: { select: { name: true } } } },
-      review: true
+      review: true,
+      payment: true,
     }
   });
 };
 
-const updateBookingStatus = async (id: string, userId: string, role: string, status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED') => {
+const updateBookingStatus = async (id: string, userId: string, role: string, status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED') => {
   const booking = await prisma.bookings.findUnique({ 
     where: { id }, 
     include: { tutor: true } 

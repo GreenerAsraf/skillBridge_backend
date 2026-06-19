@@ -13,6 +13,7 @@ export const PublicTutorRoutes = publicRouter;
 
 // Private management routes (mount on /api/tutor)
 const managementRouter = express.Router();
+managementRouter.get('/profile', authMiddleware('TUTOR'), TutorController.getMyProfile);
 managementRouter.put('/profile', authMiddleware('TUTOR'), validateRequest(TutorValidation.updateProfileValidationSchema), TutorController.updateProfile);
 managementRouter.put('/availability', authMiddleware('TUTOR'), validateRequest(TutorValidation.updateAvailabilityValidationSchema), TutorController.updateAvailability);
 

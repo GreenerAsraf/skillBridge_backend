@@ -9,6 +9,7 @@ import { PublicTutorRoutes, TutorManagementRoutes } from './modules/tutor/tutor.
 import { CategoryRoutes } from './modules/Category/category.route'
 import { BookingRoutes, AdminBookingRoutes } from './modules/Booking/booking.route'
 import { ReviewRoutes, AdminReviewRoutes } from './modules/Review/review.route'
+import { PaymentRoutes } from './modules/Payment/payment.route'
 import { auth } from './lib/auth'
 import { toNodeHandler } from 'better-auth/node'
 import globalErrorHandler from './middlewares/globalErrorHandler'
@@ -22,10 +23,20 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean).map((url) => url!.replace(/\/$/, '')) as string[]
 
+// Payment callback routes must accept cross-origin POSTs from SSLCommerz.
+// When SSLCommerz redirects the browser via form POST, the browser sends
+// Origin: null (a literal string). These routes must bypass strict CORS.
+app.use('/api/payment/success', cors({ origin: true, credentials: false }))
+app.use('/api/payment/fail', cors({ origin: true, credentials: false }))
+app.use('/api/payment/cancel', cors({ origin: true, credentials: false }))
+app.use('/api/payment/ipn', cors({ origin: true, credentials: false }))
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. curl, Postman, same-origin)
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Also allow origin "null" — browsers send this string on cross-origin
+    // form POSTs after a redirect (e.g. from SSLCommerz gateway callbacks)
+    if (!origin || origin === 'null' || allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
       callback(new Error(`CORS: origin ${origin} not allowed`))
@@ -60,6 +71,7 @@ app.use('/api/tutor', TutorManagementRoutes) // Private tutor management
 app.use('/api/categories', CategoryRoutes) // Category management
 app.use('/api/bookings', BookingRoutes) // Bookings management
 app.use('/api/reviews', ReviewRoutes) // Reviews management
+app.use('/api/payment', PaymentRoutes) // Payment management
 
 app.get('/', (req, res) => {
   res.send('Hello World from skillbridge backend! 101 Hello World from skillbridge backend! 101')

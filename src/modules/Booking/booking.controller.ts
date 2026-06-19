@@ -7,7 +7,12 @@ import AppError from '../../errors/AppError';
 const createBooking = catchAsync(async (req: Request, res: Response) => {
   const studentId = (req as any).user.id;
   const result = await BookingService.createBooking(studentId, req.body);
-  sendResponse(res, { statusCode: 201, success: true, message: 'Booking created successfully', data: result });
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Booking created. Redirecting to payment gateway...',
+    data: result, // includes { booking, paymentUrl, transactionId }
+  });
 });
 
 const getMyBookings = catchAsync(async (req: Request, res: Response) => {

@@ -29,9 +29,16 @@ const getTutorById = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, { statusCode: 200, success: true, message: 'Tutor retrieved successfully', data: result });
 });
 
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const result = await TutorService.getMyProfile(userId);
+  sendResponse(res, { statusCode: 200, success: true, message: 'Profile retrieved successfully', data: result });
+});
+
 export const TutorController = {
   updateProfile,
   updateAvailability,
   getAllTutors,
-  getTutorById
+  getTutorById,
+  getMyProfile
 };

@@ -153,13 +153,36 @@ model Bookings {
   startTime String
   endTime   String
   review    Reviews?
-  status    BookingStatus @default(CONFIRMED)
+  payment   Payment?
+  status    BookingStatus @default(PENDING)
   createdAt DateTime      @default(now())
 }
 
+model Payment {
+  id              String        @id @default(uuid())
+  bookingId       String        @unique
+  booking         Bookings      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount          Float
+  currency        String        @default("BDT")
+  transactionId   String        @unique
+  valId           String?
+  status          PaymentStatus @default(PENDING)
+  gatewayResponse Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
 enum BookingStatus {
+  PENDING
   CONFIRMED
   COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
   CANCELLED
 }
 
