@@ -1,7 +1,5 @@
 import express, { Application } from 'express'
-
-import cors from 'cors';
-
+import cors from 'cors'
 
 import { AuthRoutes } from './modules/Auth/auth.route'
 import { AdminRoutes } from './modules/User/user.route'
@@ -17,77 +15,87 @@ import notFound from './middlewares/notFound'
 
 const app: Application = express()
 
+// SSLCommerz payment callback paths
+const PAYMENT_CALLBACK_PATHS = [
+  '/api/payment/success',
+  '/api/payment/fail',
+  '/api/payment/cancel',
+  '/api/payment/ipn',
+]
+
 const allowedOrigins = [
   'https://skill-bridge-client-pi.vercel.app',
+  'https://sandbox.sslcommerz.com',
+  'https://securepay.sslcommerz.com',
   'http://localhost:3000',
   process.env.FRONTEND_URL,
 ].filter(Boolean).map((url) => url!.replace(/\/$/, '')) as string[]
 
-// Payment callback routes must accept cross-origin POSTs from SSLCommerz.
-// When SSLCommerz redirects the browser via form POST, the browser sends
-// Origin: null (a literal string). These routes must bypass strict CORS.
-app.use('/api/payment/success', cors({ origin: true, credentials: false }))
-app.use('/api/payment/fail', cors({ origin: true, credentials: false }))
-app.use('/api/payment/cancel', cors({ origin: true, credentials: false }))
-app.use('/api/payment/ipn', cors({ origin: true, credentials: false }))
+// Unified CORS middleware
+app.use((req, res, next) => {
+  const isPaymentCallback = PAYMENT_CALLBACK_PATHS.some((p) => req.path === p)
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. curl, Postman, same-origin)
-    // Also allow origin "null" — browsers send this string on cross-origin
-    // form POSTs after a redirect (e.g. from SSLCommerz gateway callbacks)
-    if (
-      !origin ||
-      origin === 'null' ||
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('.sslcommerz.com') ||
-      origin === 'https://sandbox.sslcommerz.com' ||
-      origin === 'https://securepay.sslcommerz.com'
-    ) {
-      callback(null, true)
-    } else {
-      callback(new Error(`CORS: origin ${origin} not allowed`))
-    }
-  },
-  credentials: true
-}))
-
-app.use(express.json()) // Middleware to parse JSON bodies
-
-app.use('/api/auth', (req, res, next) => {
-  const betterAuthRoutes = [
-    '/sign-in', '/sign-up', '/session', '/callback', 
-    '/sign-out', '/error', '/verify-email', 
-    '/forget-password', '/reset-password'
-  ];
-  // req.path contains the path without the mount prefix in app.use, but for app.all it contains the full path
-  // Wait, req.path in app.all('/api/auth(.*)') will be the full path e.g. /api/auth/sign-in
-  const path = req.path.replace('/api/auth', '');
-  if (betterAuthRoutes.some(route => path.startsWith(route))) {
-    return toNodeHandler(auth)(req, res);
+  if (isPaymentCallback) {
+    // Allow all for SSLCommerz callbacks
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    if (req.method === 'OPTIONS') return res.sendStatus(200)
+    return next()
   }
-  next();
-});
 
-app.use('/api/auth', AuthRoutes) // Use the custom JWT router for authentication routes
-app.use('/api/admin', AdminRoutes) // Admin routes for managing users
-app.use('/api/admin/bookings', AdminBookingRoutes) // Admin routes for managing bookings
-app.use('/api/admin/reviews', AdminReviewRoutes) // Admin routes for managing reviews
-app.use('/api/tutors', PublicTutorRoutes) // Public tutor browsing
-app.use('/api/tutor', TutorManagementRoutes) // Private tutor management
-app.use('/api/categories', CategoryRoutes) // Category management
-app.use('/api/bookings', BookingRoutes) // Bookings management
-app.use('/api/reviews', ReviewRoutes) // Reviews management
-app.use('/api/payment', PaymentRoutes) // Payment management
+  return cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true)
+      const norm = origin.replace(/\/$/, '')
 
-app.get('/', (req, res) => {
-  res.send('Hello World from skillbridge backend! 101 Hello World from skillbridge backend! 101')
+      if (
+        norm === 'null' ||
+        allowedOrigins.includes(norm) ||
+        norm.endsWith('sslcommerz.com') // ✅ sandbox + secure both allowed
+      ) {
+        return callback(null, true)
+      }
+
+      callback(new Error(`CORS: origin ${origin} not allowed`))
+    },
+    credentials: true,
+  })(req, res, next)
 })
 
-// Global Error Handler
-app.use(globalErrorHandler)
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-// Not Found Handler
+// Auth routes
+app.use('/api/auth', (req, res, next) => {
+  const betterAuthRoutes = [
+    '/sign-in', '/sign-up', '/session', '/callback',
+    '/sign-out', '/error', '/verify-email',
+    '/forget-password', '/reset-password'
+  ]
+  const path = req.path.replace('/api/auth', '')
+  if (betterAuthRoutes.some(route => path.startsWith(route))) {
+    return toNodeHandler(auth)(req, res)
+  }
+  next()
+})
+
+app.use('/api/auth', AuthRoutes)
+app.use('/api/admin', AdminRoutes)
+app.use('/api/admin/bookings', AdminBookingRoutes)
+app.use('/api/admin/reviews', AdminReviewRoutes)
+app.use('/api/tutors', PublicTutorRoutes)
+app.use('/api/tutor', TutorManagementRoutes)
+app.use('/api/categories', CategoryRoutes)
+app.use('/api/bookings', BookingRoutes)
+app.use('/api/reviews', ReviewRoutes)
+app.use('/api/payment', PaymentRoutes)
+
+app.get('/', (req, res) => {
+  res.send('Hello World from skillbridge backend!')
+})
+
+app.use(globalErrorHandler)
 app.use(notFound)
 
 export default app
