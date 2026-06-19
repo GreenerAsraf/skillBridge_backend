@@ -36,7 +36,14 @@ app.use(cors({
     // Allow requests with no origin (e.g. curl, Postman, same-origin)
     // Also allow origin "null" — browsers send this string on cross-origin
     // form POSTs after a redirect (e.g. from SSLCommerz gateway callbacks)
-    if (!origin || origin === 'null' || allowedOrigins.includes(origin)) {
+    if (
+      !origin ||
+      origin === 'null' ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.sslcommerz.com') ||
+      origin === 'https://sandbox.sslcommerz.com' ||
+      origin === 'https://securepay.sslcommerz.com'
+    ) {
       callback(null, true)
     } else {
       callback(new Error(`CORS: origin ${origin} not allowed`))
