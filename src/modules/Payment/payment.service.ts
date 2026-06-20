@@ -21,16 +21,15 @@ export const initiatePayment = async (bookingId: string) => {
     throw new Error('Tutor has not set a valid hourly price. Cannot initiate payment.');
   }
   const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:5000';
-  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
-
+  const cleanBackendUrl = backendUrl.replace(/\/+$/, '').replace(/\/api$/, '');
   const data = {
     total_amount: amount,
     currency: 'BDT',
     tran_id: transactionId,
-    success_url: `${backendUrl}/api/payment/success?bookingId=${bookingId}&transactionId=${transactionId}`,
-    fail_url: `${backendUrl}/api/payment/fail?bookingId=${bookingId}`,
-    cancel_url: `${backendUrl}/api/payment/cancel?bookingId=${bookingId}`,
-    ipn_url: `${backendUrl}/api/payment/ipn`,
+    success_url: `${cleanBackendUrl}/api/payment/success?bookingId=${bookingId}&transactionId=${transactionId}`,
+    fail_url: `${cleanBackendUrl}/api/payment/fail?bookingId=${bookingId}`,
+    cancel_url: `${cleanBackendUrl}/api/payment/cancel?bookingId=${bookingId}`,
+    ipn_url: `${cleanBackendUrl}/api/payment/ipn`,
     shipping_method: 'NO',
     product_name: 'Tutoring Session',
     product_category: 'Education',
@@ -41,10 +40,12 @@ export const initiatePayment = async (bookingId: string) => {
     cus_city: 'Dhaka',
     cus_country: 'Bangladesh',
     cus_phone: '01700000000',
+    cus_postcode: '1000',
     ship_name: booking.student.name,
     ship_add1: 'Dhaka',
     ship_city: 'Dhaka',
     ship_country: 'Bangladesh',
+    ship_postcode: '1000',
     multi_card_name: 'mastercard,visa,bkash,nagad',
   };
 

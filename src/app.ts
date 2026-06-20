@@ -34,6 +34,7 @@ const allowedOrigins = [
 // Unified CORS middleware
 app.use((req, res, next) => {
   const isPaymentCallback = PAYMENT_CALLBACK_PATHS.some((p) => req.path === p)
+  console.log('[CORS Debug] req.path:', req.path, 'isPaymentCallback:', isPaymentCallback, 'origin:', req.headers.origin)
 
   if (isPaymentCallback) {
     // Allow all for SSLCommerz callbacks
@@ -46,6 +47,7 @@ app.use((req, res, next) => {
 
   return cors({
     origin: (origin, callback) => {
+      console.log('[CORS Debug] cors origin function called with origin:', origin)
       if (!origin) return callback(null, true)
       const norm = origin.replace(/\/$/, '')
 
@@ -57,6 +59,7 @@ app.use((req, res, next) => {
         return callback(null, true)
       }
 
+      console.log('[CORS Debug] CORS denied for origin:', origin, 'norm:', norm)
       callback(new Error(`CORS: origin ${origin} not allowed`))
     },
     credentials: true,
