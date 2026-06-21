@@ -31,6 +31,12 @@ exports.auth = (0, better_auth_1.betterAuth)({
     emailAndPassword: {
         enabled: true
     },
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }
+    },
     user: {
         additionalFields: {
             role: {

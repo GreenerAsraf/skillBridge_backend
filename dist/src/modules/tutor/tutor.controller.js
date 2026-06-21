@@ -30,9 +30,15 @@ const getTutorById = (0, catchAsync_1.default)(async (req, res) => {
         throw new AppError_1.default(404, 'Tutor not found');
     (0, sendResponse_1.default)(res, { statusCode: 200, success: true, message: 'Tutor retrieved successfully', data: result });
 });
+const getMyProfile = (0, catchAsync_1.default)(async (req, res) => {
+    const userId = req.user.id;
+    const result = await tutor_service_1.TutorService.getMyProfile(userId);
+    (0, sendResponse_1.default)(res, { statusCode: 200, success: true, message: 'Profile retrieved successfully', data: result });
+});
 exports.TutorController = {
     updateProfile,
     updateAvailability,
     getAllTutors,
-    getTutorById
+    getTutorById,
+    getMyProfile
 };

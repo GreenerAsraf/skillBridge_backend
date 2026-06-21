@@ -2,15 +2,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookingService = void 0;
 const prisma_1 = require("../../lib/prisma");
+const payment_service_1 = require("../Payment/payment.service");
 const createBooking = async (studentId, payload) => {
     // Payload should have tutorId, date, startTime, endTime
-    return await prisma_1.prisma.bookings.create({
+    // Booking starts as PENDING — payment must be completed to become CONFIRMED
+    const booking = await prisma_1.prisma.bookings.create({
         data: {
             ...payload,
-            date: new Date(payload.date), // Convert string to Date
-            studentId
-        }
+            date: new Date(payload.date),
+            studentId,
+            status: 'PENDING',
+        },
     });
+    // Auto-initiate SSLCommerz payment and return the gateway URL
+    const { paymentUrl, transactionId } = await (0, payment_service_1.initiatePayment)(booking.id);
+    return { booking, paymentUrl, transactionId };
 };
 const getMyBookings = async (userId, role) => {
     // If role is TUTOR, find by their tutorProfile id
@@ -33,7 +39,8 @@ const getMyBookings = async (userId, role) => {
             tutor: {
                 include: { user: { select: { name: true, email: true } } }
             },
-            review: true
+            review: true,
+            payment: true,
         },
         orderBy: { createdAt: 'desc' }
     });
@@ -44,7 +51,8 @@ const getBookingDetails = async (id) => {
         include: {
             student: { select: { name: true, email: true } },
             tutor: { include: { user: { select: { name: true } } } },
-            review: true
+            review: true,
+            payment: true,
         }
     });
 };

@@ -4,19 +4,31 @@ exports.TutorService = void 0;
 const prisma_1 = require("../../lib/prisma");
 // Create or update tutor profile
 const updateTutorProfile = async (userId, payload) => {
+    const { categoryId, ...restPayload } = payload;
+    const data = { ...restPayload };
     const existingProfile = await prisma_1.prisma.tutorProfiles.findUnique({
         where: { authorId: userId }
     });
     if (existingProfile) {
+        if (categoryId) {
+            data.categories = {
+                set: [{ id: categoryId }]
+            };
+        }
         return await prisma_1.prisma.tutorProfiles.update({
             where: { authorId: userId },
-            data: payload,
+            data,
         });
     }
     else {
+        if (categoryId) {
+            data.categories = {
+                connect: [{ id: categoryId }]
+            };
+        }
         return await prisma_1.prisma.tutorProfiles.create({
             data: {
-                ...payload,
+                ...data,
                 authorId: userId,
             }
         });
@@ -85,9 +97,29 @@ const getTutorById = async (id) => {
         }
     });
 };
+// Get tutor profile by User ID (authorId)
+const getMyProfile = async (userId) => {
+    return await prisma_1.prisma.tutorProfiles.findUnique({
+        where: { authorId: userId },
+        include: {
+            user: { select: { name: true, email: true, image: true } },
+            categories: true,
+            availability: true,
+            reviews: {
+                include: {
+                    user: { select: { name: true } }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            }
+        }
+    });
+};
 exports.TutorService = {
     updateTutorProfile,
     updateAvailability,
     getAllTutors,
-    getTutorById
+    getTutorById,
+    getMyProfile
 };

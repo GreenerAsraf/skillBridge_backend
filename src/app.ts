@@ -33,8 +33,9 @@ const allowedOrigins = [
 
 // Unified CORS middleware
 app.use((req, res, next) => {
-  const isPaymentCallback = PAYMENT_CALLBACK_PATHS.some((p) => req.path === p)
-  console.log('[CORS Debug] req.path:', req.path, 'isPaymentCallback:', isPaymentCallback, 'origin:', req.headers.origin)
+  const cleanPath = req.path.replace(/\/$/, '')
+  const isPaymentCallback = PAYMENT_CALLBACK_PATHS.some((p) => cleanPath === p.replace(/\/$/, ''))
+  console.log('[CORS Debug] req.path:', req.path, 'cleanPath:', cleanPath, 'isPaymentCallback:', isPaymentCallback, 'origin:', req.headers.origin)
 
   if (isPaymentCallback) {
     // Allow all for SSLCommerz callbacks
@@ -51,10 +52,12 @@ app.use((req, res, next) => {
       if (!origin) return callback(null, true)
       const norm = origin.replace(/\/$/, '')
 
+      const isSslCommerz = /^https?:\/\/(?:[a-zA-Z0-9-]+\.)*sslcommerz\.com(?::\d+)?$/.test(norm)
+
       if (
         norm === 'null' ||
         allowedOrigins.includes(norm) ||
-        norm.endsWith('sslcommerz.com') // ✅ sandbox + secure both allowed
+        isSslCommerz
       ) {
         return callback(null, true)
       }

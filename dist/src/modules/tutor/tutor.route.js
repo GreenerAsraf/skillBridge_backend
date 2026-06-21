@@ -16,6 +16,7 @@ publicRouter.get('/:id', tutor_controller_1.TutorController.getTutorById);
 exports.PublicTutorRoutes = publicRouter;
 // Private management routes (mount on /api/tutor)
 const managementRouter = express_1.default.Router();
+managementRouter.get('/profile', (0, auth_1.authMiddleware)('TUTOR'), tutor_controller_1.TutorController.getMyProfile);
 managementRouter.put('/profile', (0, auth_1.authMiddleware)('TUTOR'), (0, validateRequest_1.default)(tutor_validation_1.TutorValidation.updateProfileValidationSchema), tutor_controller_1.TutorController.updateProfile);
 managementRouter.put('/availability', (0, auth_1.authMiddleware)('TUTOR'), (0, validateRequest_1.default)(tutor_validation_1.TutorValidation.updateAvailabilityValidationSchema), tutor_controller_1.TutorController.updateAvailability);
 exports.TutorManagementRoutes = managementRouter;

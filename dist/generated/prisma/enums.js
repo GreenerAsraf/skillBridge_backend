@@ -9,7 +9,7 @@
 * 🟢 You can import this file directly.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BookingStatus = exports.Day = exports.UserStatus = exports.Role = void 0;
+exports.PaymentStatus = exports.BookingStatus = exports.Day = exports.UserStatus = exports.Role = void 0;
 exports.Role = {
     USER: 'USER',
     ADMIN: 'ADMIN',
@@ -30,7 +30,14 @@ exports.Day = {
     FRI: 'FRI'
 };
 exports.BookingStatus = {
+    PENDING: 'PENDING',
     CONFIRMED: 'CONFIRMED',
     COMPLETED: 'COMPLETED',
+    CANCELLED: 'CANCELLED'
+};
+exports.PaymentStatus = {
+    PENDING: 'PENDING',
+    SUCCESS: 'SUCCESS',
+    FAILED: 'FAILED',
     CANCELLED: 'CANCELLED'
 };

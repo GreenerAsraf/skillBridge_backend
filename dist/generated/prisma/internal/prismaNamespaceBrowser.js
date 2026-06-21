@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.ReviewsScalarFieldEnum = exports.BookingsScalarFieldEnum = exports.TutorAvailabilityScalarFieldEnum = exports.CategoryScalarFieldEnum = exports.TutorProfilesScalarFieldEnum = exports.VerificationScalarFieldEnum = exports.AccountScalarFieldEnum = exports.SessionScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.NullableJsonNullValueInput = exports.SortOrder = exports.ReviewsScalarFieldEnum = exports.PaymentScalarFieldEnum = exports.BookingsScalarFieldEnum = exports.TutorAvailabilityScalarFieldEnum = exports.CategoryScalarFieldEnum = exports.TutorProfilesScalarFieldEnum = exports.VerificationScalarFieldEnum = exports.AccountScalarFieldEnum = exports.SessionScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -83,6 +83,7 @@ exports.ModelName = {
     Category: 'Category',
     TutorAvailability: 'TutorAvailability',
     Bookings: 'Bookings',
+    Payment: 'Payment',
     Reviews: 'Reviews'
 };
 /*
@@ -172,6 +173,18 @@ exports.BookingsScalarFieldEnum = {
     status: 'status',
     createdAt: 'createdAt'
 };
+exports.PaymentScalarFieldEnum = {
+    id: 'id',
+    bookingId: 'bookingId',
+    amount: 'amount',
+    currency: 'currency',
+    transactionId: 'transactionId',
+    valId: 'valId',
+    status: 'status',
+    gatewayResponse: 'gatewayResponse',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
 exports.ReviewsScalarFieldEnum = {
     id: 'id',
     studentId: 'studentId',
@@ -185,6 +198,10 @@ exports.SortOrder = {
     asc: 'asc',
     desc: 'desc'
 };
+exports.NullableJsonNullValueInput = {
+    DbNull: exports.DbNull,
+    JsonNull: exports.JsonNull
+};
 exports.QueryMode = {
     default: 'default',
     insensitive: 'insensitive'
@@ -192,4 +209,9 @@ exports.QueryMode = {
 exports.NullsOrder = {
     first: 'first',
     last: 'last'
+};
+exports.JsonNullValueFilter = {
+    DbNull: exports.DbNull,
+    JsonNull: exports.JsonNull,
+    AnyNull: exports.AnyNull
 };
