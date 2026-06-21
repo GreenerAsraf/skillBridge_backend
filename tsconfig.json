@@ -1,26 +1,47 @@
+// {
+//   "compilerOptions": {
+//     "module": "CommonJS",
+//     "moduleResolution": "node",
+//     "target": "ES2022",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "skipLibCheck": true,
+//     "outDir": "./dist",
+//     "rootDir": "./",
+//     "resolveJsonModule": true,
+//     "isolatedModules": true,
+//     "sourceMap": true,
+//     "declaration": true,
+//     "declarationMap": true
+//   },
+//   "include": [
+//     "src/**/*",
+//     "src/types",
+//     "generated/**/*"
+//   ],
+//   "exclude": [
+//     "node_modules",
+//     "dist"
+//   ]
+// }
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "node",
     "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true
+    "types": [
+      "node"
+    ]
   },
   "include": [
-    "src/**/*",
-    "src/types",
-    "generated/**/*"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "dist"
+    "node_modules"
   ]
 }

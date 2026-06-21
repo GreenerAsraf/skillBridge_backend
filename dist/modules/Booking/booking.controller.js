@@ -11,7 +11,12 @@ const AppError_1 = __importDefault(require("../../errors/AppError"));
 const createBooking = (0, catchAsync_1.default)(async (req, res) => {
     const studentId = req.user.id;
     const result = await booking_service_1.BookingService.createBooking(studentId, req.body);
-    (0, sendResponse_1.default)(res, { statusCode: 201, success: true, message: 'Booking created successfully', data: result });
+    (0, sendResponse_1.default)(res, {
+        statusCode: 201,
+        success: true,
+        message: 'Booking created. Redirecting to payment gateway...',
+        data: result, // includes { booking, paymentUrl, transactionId }
+    });
 });
 const getMyBookings = (0, catchAsync_1.default)(async (req, res) => {
     const userId = req.user.id;

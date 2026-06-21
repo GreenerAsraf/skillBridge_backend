@@ -36,7 +36,7 @@ const createReview = async (studentId: string, payload: { bookingId: string; rat
     where: { tutorId: booking.tutorId }
   });
   
-  const totalRating = tutorReviews.reduce((sum, r) => sum + r.rating, 0);
+  const totalRating = tutorReviews.reduce((sum: number, r: { rating: number; }) => sum + r.rating, 0);
   const averageRating = totalRating / tutorReviews.length;
 
   await prisma.tutorProfiles.update({

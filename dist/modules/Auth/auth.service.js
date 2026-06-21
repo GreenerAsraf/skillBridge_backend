@@ -49,6 +49,10 @@ const loginUserIntoDB = async (payload) => {
     if (!isPasswordMatched) {
         throw new Error('Invalid credentials!');
     }
+    // Check if user is blocked/banned
+    if (user.status === 'BLOCKED') {
+        throw new Error('Your account has been blocked!');
+    }
     // ৩. JWT টোকেন তৈরি করা
     const jwtPayload = {
         id: user.id,

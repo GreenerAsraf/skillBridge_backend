@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+  STUDENT
+  TUTOR
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  password      String
+  emailVerified Boolean?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  // Custom Application Relations
+  role         Role           @default(STUDENT)
+  status       UserStatus     @default(ACTIVE)
+  tutorProfile TutorProfiles?
+  bookings     Bookings[]
+  reviews      Reviews[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+// --------------------------
+
+model TutorProfiles {
+  id          String   @id @default(uuid())
+  bio         String?
+  subject     String[]
+  hourlyPrice Float
+  rating      Float    @default(0)
+
+  authorId String @unique // One-to-One with User
+  user     User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  availability TutorAvailability[]
+  categories   Category[]          @relation("TutorCategories")
+  bookings     Bookings[]
+  reviews      Reviews[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  // Many-to-Many relationship with TutorProfiles
+  tutors TutorProfiles[] @relation("TutorCategories")
+
+  createdAt DateTime @default(now())
+}
+
+model TutorAvailability {
+  id String @id @default(uuid())
+
+  tutorProfileId String
+  tutorProfile   TutorProfiles @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+
+  day       Day
+  startTime DateTime
+  endTime   DateTime
+
+  @@index([tutorProfileId, day])
+}
+
+enum Day {
+  SAT
+  SUN
+  MON
+  TUE
+  WED
+  THU
+  FRI
+}
+
+model Bookings {
+  id        String @id @default(uuid())
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
+  tutorId String // REMOVED @unique constraint here
+  tutor   TutorProfiles @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  date      DateTime
+  startTime String
+  endTime   String
+  review    Reviews?
+  payment   Payment?
+  status    BookingStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  bookingId       String        @unique
+  booking         Bookings      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount          Float
+  currency        String        @default("BDT")
+  transactionId   String        @unique
+  valId           String?
+  status          PaymentStatus @default(PENDING)
+  gatewayResponse Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+model Reviews {
+  id        String        @id @default(uuid())
+  studentId String
+  user      User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutorId   String
+  tutor     TutorProfiles @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  bookingId String        @unique
+  booking   Bookings      @relation(fields: [bookingId], references: [id])
+  rating    Float
+  comment   String        @db.Text
+  createdAt DateTime      @default(now())
+
+  @@unique([studentId, tutorId])
+}

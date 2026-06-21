@@ -7,6 +7,7 @@ const updateProfileValidationSchema = zod_1.z.object({
         bio: zod_1.z.string().optional(),
         subject: zod_1.z.array(zod_1.z.string()).optional(),
         hourlyPrice: zod_1.z.number().min(0, 'Price must be a positive number').optional(),
+        categoryId: zod_1.z.string().optional(),
     })
 });
 const updateAvailabilityValidationSchema = zod_1.z.object({
