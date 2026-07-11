@@ -100,10 +100,58 @@ const getAllBookingsForAdmin = async () => {
   });
 };
 
+const getStudentStats = async (studentId: string) => {
+  const total = await prisma.bookings.count({
+    where: { studentId }
+  });
+
+  const pending = await prisma.bookings.count({
+    where: { studentId, status: 'PENDING' }
+  });
+
+  const upcoming = await prisma.bookings.count({
+    where: { studentId, status: 'CONFIRMED' }
+  });
+
+  const completed = await prisma.bookings.count({
+    where: { studentId, status: 'COMPLETED' }
+  });
+
+  const cancelled = await prisma.bookings.count({
+    where: { studentId, status: 'CANCELLED' }
+  });
+
+  const totalSpentRes = await prisma.payment.aggregate({
+    where: {
+      booking: { studentId },
+      status: 'SUCCESS'
+    },
+    _sum: {
+      amount: true
+    }
+  });
+
+  const avgRatingRes = await prisma.reviews.aggregate({
+    where: { studentId },
+    _avg: { rating: true }
+  });
+
+  return {
+    total,
+    pending,
+    upcoming,
+    completed,
+    cancelled,
+    totalSpent: totalSpentRes._sum.amount ?? 0,
+    avgRatingGiven: avgRatingRes._avg.rating ?? 0
+  };
+};
+
 export const BookingService = {
   createBooking,
   getMyBookings,
   getBookingDetails,
   updateBookingStatus,
-  getAllBookingsForAdmin
+  getAllBookingsForAdmin,
+  getStudentStats,
 };

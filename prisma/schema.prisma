@@ -96,6 +96,7 @@ model TutorProfiles {
   subject     String[] 
   hourlyPrice Float
   rating      Float    @default(0)
+  isApproved  Boolean? @default(false)
 
   authorId String @unique // One-to-One with User
   user     User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -201,4 +202,17 @@ model Reviews {
   createdAt DateTime      @default(now())
 
   @@unique([studentId, tutorId])
+}
+
+model Blog {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  coverImage  String?
+  authorName  String   @default("SkillBridge Team")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blog")
 }

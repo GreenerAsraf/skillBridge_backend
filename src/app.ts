@@ -1,19 +1,36 @@
 import express, { Application } from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import compression from 'compression'
+import rateLimit from 'express-rate-limit'
 
 import { AuthRoutes } from './modules/Auth/auth.route'
-import { AdminRoutes } from './modules/User/user.route'
+import { AdminRoutes, UserRoutes } from './modules/User/user.route'
 import { PublicTutorRoutes, TutorManagementRoutes } from './modules/tutor/tutor.route'
 import { CategoryRoutes } from './modules/Category/category.route'
 import { BookingRoutes, AdminBookingRoutes } from './modules/Booking/booking.route'
 import { ReviewRoutes, AdminReviewRoutes } from './modules/Review/review.route'
 import { PaymentRoutes } from './modules/Payment/payment.route'
+import { StatsRoutes } from './modules/Stats/stats.route'
+import { BlogRoutes } from './modules/Blog/blog.route'
 import { auth } from './lib/auth'
 import { toNodeHandler } from 'better-auth/node'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import notFound from './middlewares/notFound'
 
 const app: Application = express()
+
+// Production hardening
+app.use(helmet())
+app.use(compression())
+
+// Rate limiting (basic)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // limit each IP to 300 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+})
+app.use(limiter)
 
 // SSLCommerz payment callback paths
 const PAYMENT_CALLBACK_PATHS = [
@@ -35,7 +52,6 @@ const allowedOrigins = [
 app.use((req, res, next) => {
   const cleanPath = req.path.replace(/\/$/, '')
   const isPaymentCallback = PAYMENT_CALLBACK_PATHS.some((p) => cleanPath === p.replace(/\/$/, ''))
-  console.log('[CORS Debug] req.path:', req.path, 'cleanPath:', cleanPath, 'isPaymentCallback:', isPaymentCallback, 'origin:', req.headers.origin)
 
   if (isPaymentCallback) {
     // Allow all for SSLCommerz callbacks
@@ -48,7 +64,6 @@ app.use((req, res, next) => {
 
   return cors({
     origin: (origin, callback) => {
-      console.log('[CORS Debug] cors origin function called with origin:', origin)
       if (!origin) return callback(null, true)
       const norm = origin.replace(/\/$/, '')
 
@@ -96,6 +111,10 @@ app.use('/api/categories', CategoryRoutes)
 app.use('/api/bookings', BookingRoutes)
 app.use('/api/reviews', ReviewRoutes)
 app.use('/api/payment', PaymentRoutes)
+app.use('/api/stats', StatsRoutes)
+app.use('/api/users', UserRoutes)
+app.use('/api/blog', BlogRoutes)
+
 
 app.get('/', (req, res) => {
   res.send('Hello World from skillbridge backend!')

@@ -44,10 +44,17 @@ const getAllBookingsForAdmin = catchAsync(async (req: Request, res: Response) =>
   sendResponse(res, { statusCode: 200, success: true, message: 'All bookings retrieved successfully', data: result });
 });
 
+const getStudentStats = catchAsync(async (req: Request, res: Response) => {
+  const studentId = (req as any).user.id;
+  const result = await BookingService.getStudentStats(studentId);
+  sendResponse(res, { statusCode: 200, success: true, message: 'Student stats retrieved successfully', data: result });
+});
+
 export const BookingController = {
   createBooking,
   getMyBookings,
   getBookingDetails,
   updateBookingStatus,
-  getAllBookingsForAdmin
+  getAllBookingsForAdmin,
+  getStudentStats,
 };

@@ -90,6 +90,14 @@ export const handlePaymentSuccess = async (bookingId: string, transactionId: str
   const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
   try {
+    const payment = await prisma.payment.findUnique({ where: { transactionId } });
+    if (!payment) throw new Error('Payment record not found');
+    
+    // If already marked success (e.g. via IPN), just return the URL
+    if (payment.status === 'SUCCESS') {
+      return `${frontendUrl}/payment/success?bookingId=${bookingId}`;
+    }
+
     // Update payment and booking atomically in a transaction
     await prisma.$transaction([
       prisma.payment.update({

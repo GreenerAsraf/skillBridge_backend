@@ -19,7 +19,7 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
 
 const getAllTutors = catchAsync(async (req: Request, res: Response) => {
   const result = await TutorService.getAllTutors(req.query);
-  sendResponse(res, { statusCode: 200, success: true, message: 'Tutors retrieved successfully', data: result });
+  sendResponse(res, { statusCode: 200, success: true, message: 'Tutors retrieved successfully', data: result.data, meta: result.meta });
 });
 
 const getTutorById = catchAsync(async (req: Request, res: Response) => {
@@ -35,10 +35,17 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, { statusCode: 200, success: true, message: 'Profile retrieved successfully', data: result });
 });
 
+const getRelatedTutors = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await TutorService.getRelatedTutors(id);
+  sendResponse(res, { statusCode: 200, success: true, message: 'Related tutors retrieved successfully', data: result });
+});
+
 export const TutorController = {
   updateProfile,
   updateAvailability,
   getAllTutors,
   getTutorById,
-  getMyProfile
+  getMyProfile,
+  getRelatedTutors,
 };

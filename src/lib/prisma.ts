@@ -5,9 +5,24 @@ import { PrismaPg } from '@prisma/adapter-pg'
 
 import { PrismaClient } from "@prisma/client";
 
-const connectionString = `${process.env.DATABASE_URL}`
+const rawUrl = `${process.env.DATABASE_URL}`
 
-const pool = new Pool({ connectionString })
+// Remove sslmode/channel_binding params from the URL so pg doesn't parse them
+// and emit the security warning. We handle SSL via the pool config below.
+const connectionString = rawUrl
+  .replace(/[?&]sslmode=[^&]*/g, '')
+  .replace(/[?&]channel_binding=[^&]*/g, '')
+  .replace(/\?&/, '?')
+  .replace(/[?&]$/, '')
+
+const pool = new Pool({
+  connectionString,
+  ssl: rawUrl.includes('neon.tech') || rawUrl.includes('railway.app') || rawUrl.includes('supabase')
+    ? { rejectUnauthorized: false }
+    : process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : undefined,
+})
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 

@@ -20,6 +20,14 @@ const createReview = async (studentId: string, payload: { bookingId: string; rat
     throw new Error('You can only review completed sessions');
   }
 
+  const existingReview = await prisma.reviews.findFirst({
+    where: { bookingId }
+  });
+
+  if (existingReview) {
+    throw new Error('You have already reviewed this session');
+  }
+
   // 2. Create the review
   const review = await prisma.reviews.create({
     data: {

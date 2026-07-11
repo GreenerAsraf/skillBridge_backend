@@ -8,6 +8,7 @@ import { TutorValidation } from './tutor.validation';
 const publicRouter = express.Router();
 publicRouter.get('/', TutorController.getAllTutors);
 publicRouter.get('/:id', TutorController.getTutorById);
+publicRouter.get('/:id/related', TutorController.getRelatedTutors);
 
 export const PublicTutorRoutes = publicRouter;
 

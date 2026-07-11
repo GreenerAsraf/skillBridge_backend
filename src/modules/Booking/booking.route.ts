@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post('/', authMiddleware('STUDENT'), validateRequest(BookingValidation.createBookingValidationSchema), BookingController.createBooking);
 router.get('/', authMiddleware('STUDENT', 'TUTOR'), BookingController.getMyBookings);
+router.get('/stats', authMiddleware('STUDENT'), BookingController.getStudentStats);
 router.get('/:id', authMiddleware('STUDENT', 'TUTOR', 'ADMIN'), BookingController.getBookingDetails);
 router.patch('/:id/status', authMiddleware('STUDENT', 'TUTOR', 'ADMIN'), validateRequest(BookingValidation.updateBookingStatusValidationSchema), BookingController.updateBookingStatus);
 
