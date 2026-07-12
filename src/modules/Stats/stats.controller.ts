@@ -53,7 +53,7 @@ const getAdminAnalytics = catchAsync(async (req: Request, res: Response) => {
   // 2. Bookings/Revenue over time (last 6 months approximation)
   // We'll just fetch all completed bookings and group them by month in JS for simplicity
   const allBookings = await prisma.bookings.findMany({
-    select: { createdAt: true, status: true, paymentStatus: true, tutorProfile: { select: { hourlyPrice: true } } },
+    select: { createdAt: true, status: true, payment: { select: { status: true } }, tutor: { select: { hourlyPrice: true } } },
   });
 
   const monthsMap: Record<string, { bookings: number; revenue: number }> = {};
@@ -70,8 +70,8 @@ const getAdminAnalytics = catchAsync(async (req: Request, res: Response) => {
     const month = b.createdAt.toLocaleString('default', { month: 'short' });
     if (monthsMap[month] !== undefined) {
       monthsMap[month].bookings += 1;
-      if (b.status === 'COMPLETED' || b.paymentStatus === 'PAID') {
-        monthsMap[month].revenue += b.tutorProfile?.hourlyPrice || 0;
+      if (b.status === 'COMPLETED' || b.payment?.status === 'SUCCESS') {
+        monthsMap[month].revenue += b.tutor?.hourlyPrice || 0;
       }
     }
   });

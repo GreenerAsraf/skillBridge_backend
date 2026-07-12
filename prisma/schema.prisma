@@ -216,3 +216,13 @@ model Blog {
 
   @@map("blog")
 }
+
+model Contact {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  @@map("contact")
+}

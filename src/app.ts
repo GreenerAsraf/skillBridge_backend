@@ -87,6 +87,8 @@ app.use((req, res, next) => {
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+import { ContactRoutes } from './modules/Contact/contact.route'
+
 // Auth routes
 app.use('/api/auth', (req, res, next) => {
   const betterAuthRoutes = [
@@ -114,6 +116,7 @@ app.use('/api/payment', PaymentRoutes)
 app.use('/api/stats', StatsRoutes)
 app.use('/api/users', UserRoutes)
 app.use('/api/blog', BlogRoutes)
+app.use('/api/contact', ContactRoutes)
 
 
 app.get('/', (req, res) => {

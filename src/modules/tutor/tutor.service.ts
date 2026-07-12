@@ -192,7 +192,7 @@ const getRelatedTutors = async (id: string) => {
   return await prisma.tutorProfiles.findMany({
     where: {
       id: { not: id },
-      isApproved: { not: false },
+      // isApproved: { not: false },
       categories: {
         some: {
           id: { in: categoryIds }
