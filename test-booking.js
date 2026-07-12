@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 async function test() {
-  const res = await fetch('https://skillbridgebackend-production-19ba.up.railway.app/api/bookings', {
+  const res = await fetch('https://skillbridge-backend-xm86.onrender.com/api/bookings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
