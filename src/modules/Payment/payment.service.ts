@@ -144,6 +144,7 @@ export const handleIPN = async (body: any) => {
 
   const payment = await prisma.payment.findUnique({ where: { transactionId: tran_id } });
   if (!payment) return;
+  if (payment.status === 'SUCCESS') return;
 
   if (status === 'VALID' || status === 'VALIDATED') {
     await prisma.$transaction([

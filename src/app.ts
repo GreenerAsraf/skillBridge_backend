@@ -87,6 +87,9 @@ app.use((req, res, next) => {
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+import path from 'path';
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 import { ContactRoutes } from './modules/Contact/contact.route'
 
 // Auth routes

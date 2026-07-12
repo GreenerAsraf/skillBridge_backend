@@ -88,6 +88,36 @@ const approveTutor = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, { statusCode: 200, success: true, message: 'Tutor approval updated', data: tutor });
 });
 
+const uploadAvatar = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  if (!req.file) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: 'No file uploaded',
+      data: null,
+    });
+  }
+
+  const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:5000';
+  const cleanBackendUrl = backendUrl.replace(/\/+$/, '').replace(/\/api$/, '');
+  
+  // Cloudinary sets req.file.path to the full URL. Local disk sets it to a local path (or we can just check filename).
+  const isCloudinary = req.file.path && req.file.path.startsWith('http');
+  const imageUrl = isCloudinary 
+    ? req.file.path 
+    : `${cleanBackendUrl}/uploads/${req.file.filename}`;
+
+  const result = await UserService.updateProfile(userId, { image: imageUrl });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Avatar uploaded successfully',
+    data: result,
+  });
+});
+
 export const UserController = {
   getMe,
   getAllUsers,
@@ -96,4 +126,5 @@ export const UserController = {
   changePassword,
   getAllAdminTutors,
   approveTutor,
+  uploadAvatar,
 };

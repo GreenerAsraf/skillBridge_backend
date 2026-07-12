@@ -12,11 +12,14 @@ router.patch('/users/:id', authMiddleware('ADMIN'), UserController.updateUserSta
 router.get('/tutors', UserController.getAllAdminTutors);
 router.patch('/tutors/:id/approve', authMiddleware('ADMIN'), UserController.approveTutor);
 
+import { upload } from '../../middlewares/upload';
+
 export const AdminRoutes = router;
 
 // User profile & password — mounted on /api/users
 const userRouter = express.Router();
 userRouter.patch('/profile', authMiddleware('STUDENT', 'TUTOR', 'ADMIN'), UserController.updateProfile);
+userRouter.post('/avatar', authMiddleware('STUDENT', 'TUTOR', 'ADMIN'), upload.single('avatar'), UserController.uploadAvatar);
 userRouter.patch('/change-password', authMiddleware('STUDENT', 'TUTOR', 'ADMIN'), UserController.changePassword);
 
 export const UserRoutes = userRouter;
