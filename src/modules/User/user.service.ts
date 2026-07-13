@@ -10,6 +10,7 @@ const getMe = async (userId: string) => {
       email: true, 
       role: true, 
       status: true, 
+      image: true,
       createdAt: true, 
       updatedAt: true 
     }

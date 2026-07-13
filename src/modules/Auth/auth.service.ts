@@ -27,6 +27,7 @@ const createUserIntoDB = async (payload: any) => {
       email: payload.email,
       password: hashPassword,
       role: payload.role || 'STUDENT',
+      ...(payload.image ? { image: payload.image } : {}),
     },
   })
 
